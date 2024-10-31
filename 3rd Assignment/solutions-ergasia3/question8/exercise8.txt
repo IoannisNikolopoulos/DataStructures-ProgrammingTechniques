@@ -1,0 +1,81 @@
+Ο αλγόριθμος Prim-Jarnik που υλοποιήθηκε στη συνάρτηση `MinimumSpanningTree` έχει ως στόχο την εύρεση του Ελάχιστου Καλύπτοντος Δένδρου (Minimum Spanning Tree) για έναν δοσμένο γράφο. Για να αναλύσουμε την υπολογιστική πολυπλοκότητα χειρίστης περίπτωσης, θα εξετάσουμε τα κυριότερα μέρη του αλγόριθμου.
+
+Αναλυτική Εξέταση της Υλοποίησης
+
+Έστω V είναι ο αριθμός των κορυφών και E είναι ο αριθμός των ακμών του γράφου.
+
+1. Αρχικοποίηση:
+   Graph mst = Initialize(graph->vertexCount);
+   bool* inMST = calloc(graph->vertexCount, sizeof(bool));
+   inMST[0] = true;
+
+   Αυτές οι ενέργειες απαιτούν O(V) χρόνο.
+
+2. Βασική Επανάληψη:
+
+   while (!mstFull(inMST, graph->vertexCount)) {
+       Vertex start = 0, end = 0;
+       int weight = INT_MAX;
+       findBestEdge(graph, inMST, &start, &end, &weight);
+       InsertEdge(mst, start, end, weight);
+       inMST[end] = true;
+   }
+
+   Το εξωτερικό `while` επαναλαμβάνεται O(V) φορές, καθώς κάθε φορά προσθέτουμε μία νέα κορυφή στο MST.
+
+3. Συνάρτηση `mstFull`:
+
+   bool mstFull(bool* inMST, int count) {
+       for (int i = 0; i < count; i++) {
+           if (!inMST[i]) return false;
+       }
+       return true;
+   }
+
+   Η συνάρτηση `mstFull` ελέγχει αν όλες οι κορυφές έχουν προστεθεί στο MST και απαιτεί O(V) χρόνο.
+
+4. Συνάρτηση `findBestEdge`:
+
+   void findBestEdge(Graph graph, bool* inMST, Vertex* start, Vertex* end, int* weight) {
+       for (int i = 0; i < graph->vertexCount; i++) {
+           if (!inMST[i]) continue;
+
+           for (Edge currentEdge = graph->edges[i]; currentEdge != NULL; currentEdge = currentEdge->next) {
+               if (inMST[currentEdge->endVertex]) continue;
+
+               if (currentEdge->weight < *weight) {
+                   *start = i;
+                   *end = currentEdge->endVertex;
+                   *weight = currentEdge->weight;
+               }
+           }
+       }
+   }
+
+   Η συνάρτηση `findBestEdge` ψάχνει για την ακμή με το ελάχιστο βάρος που συνδέει μία κορυφή στο MST με μία κορυφή εκτός του MST.
+   Στη χειρότερη περίπτωση, θα εξετάσει όλες τις ακμές O(e) για κάθε κορυφή που προστίθεται στο MST.
+   Αυτό σημαίνει ότι κάθε κλήση της `findBestEdge` απαιτεί O(E) χρόνο, όπου E το πλήθος των ακμών του γράφου.
+
+5. Συνάρτηση `InsertEdge`:
+
+   void InsertEdge(Graph graph, Vertex start, Vertex end, int weight) {
+       insertEdgeInternal(graph, start, end, weight);
+       insertEdgeInternal(graph, end, start, weight);
+   }
+
+   Η εισαγωγή μιας ακμής γίνεται σε O(n) χρόνο, καθώς οι ακμές εισάγονται σε συνδεδεμένες λίστες, όπου n το πλήθος των ακμών μιας κορυφής (αρκετά μικρότερο από το Ε ή το V).
+
+Συνολική Πολυπλοκότητα
+
+Συνοψίζοντας τα παραπάνω:
+
+- Η βασική επανάληψη εκτελείται O(V) φορές.
+- Κάθε επανάληψη της βασικής βρόχου εκτελεί τη συνάρτηση `findBestEdge`, η οποία απαιτεί O(E) χρόνο στη χειρότερη περίπτωση.
+
+Έτσι, η συνολική πολυπλοκότητα του αλγόριθμου είναι:
+
+O(V) x O(E) = O(VE)
+
+Άρα, η υπολογιστική πολυπλοκότητα χειρίστης περίπτωσης του αλγόριθμου Prim-Jarnik που υλοποιήθηκε στη συνάρτηση `MinimumSpanningTree` είναι:
+
+- O(VE)
